@@ -12,7 +12,9 @@ export default async function getBuyerProfileModel() {
       amenities: [{ type: String }],
       purpose: { type: String },
       timeline: { type: String },
-      initial_query: { type: String }
+      initial_query: { type: String },
+      email: { type: String },
+      phone: { type: String }
     });
   }
   return _model;

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { callAIAgent } from '@/lib/aiAgent'
 import parseLLMJson from '@/lib/jsonParser'
 import { Card, CardContent } from '@/components/ui/card'
@@ -70,10 +70,17 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(() => {
     try { return localStorage.getItem(PROFILE_ID_KEY) } catch { return null }
   })
+  const [authUser, setAuthUser] = useState<{ name?: string; email?: string } | null>(null)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/me').then(r => r.json()).then(d => {
+      if (d.user) setAuthUser({ name: d.user.name, email: d.user.email })
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages)) } catch {}
@@ -105,7 +112,8 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              buyer_name: userId !== 'demo-user' ? userId : 'Buyer',
+              buyer_name: authUser?.name ?? (userId !== 'demo-user' ? userId : 'Buyer'),
+              email: authUser?.email ?? '',
               purpose: 'purchase',
               initial_query: userMsg,
             }),

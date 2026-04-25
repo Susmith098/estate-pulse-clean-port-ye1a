@@ -227,6 +227,9 @@ export default function AgentView({ userId, inventory, buyerProfiles, leads, onL
                         <Badge className="text-xs border border-white/10 bg-white/5 text-slate-500">New</Badge>
                       )}
                     </div>
+                    {(profile?.email || profile?.phone) && (
+                      <p className="text-xs mt-0.5 text-violet-400/70">{profile?.email ?? profile?.phone}</p>
+                    )}
                     <p className="text-xs mt-0.5 text-slate-500">
                       {profile?.bhk ? `${profile.bhk}BHK` : ''}{profile?.location_pref ? ` · ${profile.location_pref}` : ''}{profile?.budget_max ? ` · ₹${Number(profile.budget_max / 1000000).toFixed(1)}Cr` : ''}
                     </p>
