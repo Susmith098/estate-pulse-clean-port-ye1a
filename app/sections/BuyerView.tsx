@@ -91,7 +91,9 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
     setActiveAgentId(BUYER_AGENT_ID)
 
     try {
-      const inventorySummary = Array.isArray(inventory) && inventory.length > 0
+      // Only share inventory after ≥2 user messages so agent collects preferences first
+      const userMessageCount = messages.filter(m => m.role === 'user').length
+      const inventorySummary = userMessageCount >= 2 && Array.isArray(inventory) && inventory.length > 0
         ? `\n\nAvailable inventory:\n${inventory.map((u: any) => `${u?.project_name} - ${u?.bhk}BHK, ${u?.area_sqft}sqft, Rs.${u?.price}, ${u?.location}, Floor ${u?.floor}, Amenities: ${Array.isArray(u?.amenities) ? u.amenities.join(', ') : 'N/A'}, Status: ${u?.status}`).join('\n')}`
         : ''
 
