@@ -7,7 +7,7 @@ async function handler(req: NextRequest) {
     const Model = await getBuyerProfileModel();
 
     if (req.method === 'GET') {
-      const items = await Model.findAll();
+      const items = await Model.find({});
       return NextResponse.json({ success: true, data: items });
     }
 
