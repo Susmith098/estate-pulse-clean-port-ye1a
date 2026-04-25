@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Send, MessageSquare, MapPin, Star, Loader2, Trash2 } from 'lucide-react'
+import { Send, MessageSquare, MapPin, Star, Loader2, Trash2, SquarePen } from 'lucide-react'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -181,8 +181,25 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
     }
   }
 
+  const handleNewChat = () => {
+    setMessages([])
+    setError('')
+    try { localStorage.removeItem(CHAT_STORAGE_KEY) } catch {}
+  }
+
   return (
     <div className="flex flex-col h-full bg-[#0D0D24]">
+      {messages.length > 0 && (
+        <div className="flex items-center justify-between px-5 py-2 border-b border-white/8 bg-[#0A0A1B]/40 flex-shrink-0">
+          <span className="text-xs text-slate-500">{messages.filter(m => m.role === 'user').length} message{messages.filter(m => m.role === 'user').length !== 1 ? 's' : ''} in this conversation</span>
+          <button
+            onClick={handleNewChat}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-white/8 border border-white/10 transition-all"
+          >
+            <SquarePen className="w-3.5 h-3.5" /> New Chat
+          </button>
+        </div>
+      )}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full p-4 md:p-6" ref={scrollRef}>
           {messages.length === 0 && (
