@@ -112,13 +112,11 @@ function AppContent() {
   const seedInventory = useCallback(async () => {
     setSeeding(true)
     try {
-      for (const item of SEED_INVENTORY) {
-        await fetch('/api/inventory', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(item),
-        })
-      }
+      await fetch('/api/inventory/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: SEED_INVENTORY }),
+      })
       await fetchInventory()
     } catch {}
     setSeeding(false)
@@ -241,6 +239,7 @@ function AppContent() {
               { _id: 's2', buyer_name: 'Buyer B', bhk: 3, location_pref: 'Pune', budget_min: 10000000, budget_max: 15000000, purpose: 'Investment' },
             ] : buyerProfiles}
             onInventoryChange={fetchInventory}
+            onSeedInventory={seedInventory}
             setActiveAgentId={setActiveAgentId}
           />
         )}

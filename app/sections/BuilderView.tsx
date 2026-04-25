@@ -12,13 +12,14 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, BarChart2, TrendingUp, Home, AlertCircle, LayoutGrid, Loader2, Trash2 } from 'lucide-react'
+import { Plus, BarChart2, TrendingUp, Home, AlertCircle, LayoutGrid, Loader2, Trash2, Database } from 'lucide-react'
 
 interface BuilderViewProps {
   userId: string
   inventory: any[]
   buyerProfiles: any[]
   onInventoryChange: () => void
+  onSeedInventory?: () => Promise<void>
   setActiveAgentId: (id: string | null) => void
 }
 
@@ -54,7 +55,7 @@ function demandBadgeClass(level: string) {
   return 'bg-red-500/15 text-red-400 border-red-500/30'
 }
 
-export default function BuilderView({ userId, inventory, buyerProfiles, onInventoryChange, setActiveAgentId }: BuilderViewProps) {
+export default function BuilderView({ userId, inventory, buyerProfiles, onInventoryChange, onSeedInventory, setActiveAgentId }: BuilderViewProps) {
   const [form, setForm] = useState(emptyForm)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
@@ -65,6 +66,7 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
   const [demandData, setDemandData] = useState<any>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [seeding, setSeeding] = useState(false)
 
   const items = Array.isArray(inventory) ? inventory : []
   const profiles = Array.isArray(buyerProfiles) ? buyerProfiles : []
@@ -276,7 +278,18 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                 <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-3">
                   <Home className="w-6 h-6 text-slate-500" />
                 </div>
-                <p className="text-sm text-slate-500">No inventory yet. Add properties to get started.</p>
+                <p className="text-sm text-slate-500 mb-4">No inventory yet. Add a property or load sample data.</p>
+                {onSeedInventory && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={async () => { setSeeding(true); await onSeedInventory(); setSeeding(false) }}
+                    disabled={seeding}
+                    className="rounded-xl border border-violet-500/30 text-violet-400 hover:bg-violet-600/10 text-xs"
+                  >
+                    {seeding ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> Loading...</> : <><Database className="w-3.5 h-3.5 mr-1.5" /> Load Sample Inventory</>}
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-white/8">
