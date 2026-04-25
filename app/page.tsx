@@ -190,7 +190,11 @@ function AppContent() {
             <Switch id="sample-toggle" checked={showSample} onCheckedChange={setShowSample} />
             <Label htmlFor="sample-toggle" className="text-xs cursor-pointer text-slate-400">Sample Data</Label>
           </div>
-          <div className="[&_button]:bg-transparent [&_button]:border-0 [&_button]:text-white [&_button:hover]:bg-white/10 [&_div]:bg-transparent [&_span]:text-white [&_p]:text-slate-300">
+          <div
+            id="user-menu-wrap"
+            style={{ background: 'transparent' }}
+            className="[&_*]:!bg-transparent [&_button]:!border-white/10 [&_button]:!text-slate-200 [&_button:hover]:!bg-white/10 [&_span]:!text-slate-200 [&_p]:!text-slate-400"
+          >
             <UserMenu />
           </div>
         </div>

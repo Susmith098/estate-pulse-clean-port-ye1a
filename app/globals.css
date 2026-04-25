@@ -73,3 +73,35 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Force UserMenu (lyzr-architect) to match dark theme */
+#user-menu-wrap,
+#user-menu-wrap * {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+#user-menu-wrap button:hover {
+  background-color: rgba(255,255,255,0.08) !important;
+}
+#user-menu-wrap input {
+  background-color: #1a1a35 !important;
+}
+#__next [data-lyzr-user-menu],
+.lyzr-user-menu,
+[class*="UserMenu"],
+[class*="user-menu"] {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Target the white box the UserMenu renders next to the avatar */
+header .flex.items-center > div:last-child button,
+header .flex.items-center > div:last-child > div,
+header .flex.items-center > div:last-child span:not(.sr-only) {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
