@@ -74,6 +74,35 @@
   }
 }
 
+/* Fix lyzr-architect auth form inputs — white bg makes text invisible */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  background-color: #1a1a35 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder {
+  color: #64748b !important;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: rgba(139,92,246,0.5) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(139,92,246,0.15) !important;
+}
+/* Autofill override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #1a1a35 inset !important;
+  -webkit-text-fill-color: #e2e8f0 !important;
+  caret-color: #e2e8f0 !important;
+}
+
 /* Force UserMenu (lyzr-architect) to match dark theme */
 #user-menu-wrap,
 #user-menu-wrap * {
