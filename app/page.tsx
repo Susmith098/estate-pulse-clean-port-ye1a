@@ -4,8 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { AuthProvider, ProtectedRoute, UserMenu } from 'lyzr-architect/client'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { FiHome, FiMessageSquare, FiTarget, FiBarChart2 } from 'react-icons/fi'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Home, MessageSquare, Target, BarChart2 } from 'lucide-react'
 import AuthScreen from './sections/AuthScreen'
 import BuyerView from './sections/BuyerView'
 import AgentView from './sections/AgentView'
@@ -25,11 +24,11 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(160 40% 94%) 0%, hsl(180 35% 93%) 30%, hsl(160 35% 95%) 60%, hsl(140 40% 94%) 100%)' }}>
-          <div className="text-center p-8 max-w-md bg-white/75 backdrop-blur-md rounded-xl shadow-xl border border-white/18">
-            <h2 className="text-xl font-semibold mb-2" style={{ color: 'hsl(160 35% 8%)' }}>Something went wrong</h2>
-            <p className="text-sm mb-4" style={{ color: 'hsl(160 25% 40%)' }}>{this.state.error}</p>
-            <button onClick={() => this.setState({ hasError: false, error: '' })} className="px-4 py-2 rounded-xl text-white text-sm" style={{ backgroundColor: 'hsl(160 85% 35%)' }}>Try again</button>
+        <div className="min-h-screen flex items-center justify-center bg-[#0A0A1B]">
+          <div className="text-center p-8 max-w-md bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
+            <h2 className="text-xl font-semibold mb-2 text-white">Something went wrong</h2>
+            <p className="text-sm mb-4 text-slate-400">{this.state.error}</p>
+            <button onClick={() => this.setState({ hasError: false, error: '' })} className="px-4 py-2 rounded-xl bg-violet-600 text-white text-sm hover:bg-violet-700 transition-colors">Try again</button>
           </div>
         </div>
       )
@@ -139,48 +138,59 @@ function AppContent() {
   }, [fetchInventory, fetchBuyerProfiles, fetchLeads, seedInventory])
 
   const roles: { key: Role; label: string; icon: React.ReactNode }[] = [
-    { key: 'buyer', label: 'Buyer', icon: <FiMessageSquare className="w-3.5 h-3.5" /> },
-    { key: 'agent', label: 'Agent', icon: <FiTarget className="w-3.5 h-3.5" /> },
-    { key: 'admin', label: 'Admin', icon: <FiBarChart2 className="w-3.5 h-3.5" /> },
+    { key: 'buyer', label: 'Buyer', icon: <MessageSquare className="w-3.5 h-3.5" /> },
+    { key: 'agent', label: 'Agent', icon: <Target className="w-3.5 h-3.5" /> },
+    { key: 'admin', label: 'Admin', icon: <BarChart2 className="w-3.5 h-3.5" /> },
   ]
 
   const activeAgent = AGENTS.find(a => a.id === activeAgentId)
 
   if (initialLoad) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(160 40% 94%) 0%, hsl(180 35% 93%) 30%, hsl(160 35% 95%) 60%, hsl(140 40% 94%) 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A1B]">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: 'hsl(160 85% 35%)' }} />
-          <p className="text-sm" style={{ color: 'hsl(160 25% 40%)' }}>{seeding ? 'Setting up inventory...' : 'Loading PropIntel...'}</p>
+          <div className="w-14 h-14 rounded-2xl bg-violet-600/20 flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="w-7 h-7 animate-spin text-violet-400" />
+          </div>
+          <p className="text-sm text-slate-400">{seeding ? 'Setting up inventory...' : 'Loading EstatePulse...'}</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-sans" style={{ background: 'linear-gradient(135deg, hsl(160 40% 94%) 0%, hsl(180 35% 93%) 30%, hsl(160 35% 95%) 60%, hsl(140 40% 94%) 100%)' }}>
+    <div className="min-h-screen flex flex-col font-sans bg-[#0D0D24]">
       {/* Top Bar */}
-      <header className="h-14 flex items-center justify-between px-4 border-b bg-white/60 backdrop-blur-md" style={{ borderColor: 'hsl(160 28% 88%)' }}>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'hsl(160 85% 35%)' }}>
-            <FiHome className="w-4 h-4 text-white" />
+      <header className="h-14 flex items-center justify-between px-5 border-b border-white/8 bg-[#0A0A1B]/80 backdrop-blur-md flex-shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-900/40">
+            <Home className="w-4 h-4 text-white" />
           </div>
-          <span className="text-lg font-bold" style={{ color: 'hsl(160 35% 8%)' }}>PropIntel</span>
+          <span className="text-base font-bold text-white tracking-tight">EstatePulse</span>
+          <span className="text-xs text-slate-500 ml-1 hidden sm:block">AI Pre-Sales</span>
         </div>
 
         {/* Role Switcher */}
-        <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: 'hsl(160 30% 93%)' }}>
+        <div className="flex items-center gap-0.5 p-1 rounded-xl bg-white/5 border border-white/8">
           {roles.map(r => (
-            <button key={r.key} onClick={() => setRole(r.key)} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${role === r.key ? 'text-white shadow-md' : ''}`} style={role === r.key ? { backgroundColor: 'hsl(160 85% 35%)' } : { color: 'hsl(160 25% 40%)' }}>
+            <button
+              key={r.key}
+              onClick={() => setRole(r.key)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                role === r.key
+                  ? 'bg-violet-600 text-white shadow-md shadow-violet-900/50'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
               {r.icon}{r.label}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Switch id="sample-toggle" checked={showSample} onCheckedChange={setShowSample} />
-            <Label htmlFor="sample-toggle" className="text-xs cursor-pointer" style={{ color: 'hsl(160 25% 40%)' }}>Sample Data</Label>
+            <Label htmlFor="sample-toggle" className="text-xs cursor-pointer text-slate-400">Sample Data</Label>
           </div>
           <UserMenu />
         </div>
@@ -188,9 +198,9 @@ function AppContent() {
 
       {/* Active Agent Indicator */}
       {activeAgent && (
-        <div className="flex items-center gap-2 px-4 py-1.5 text-xs border-b" style={{ backgroundColor: 'hsl(160 85% 35% / 0.06)', borderColor: 'hsl(160 28% 88%)' }}>
-          <Loader2 className="w-3 h-3 animate-spin" style={{ color: 'hsl(160 85% 35%)' }} />
-          <span style={{ color: 'hsl(160 25% 40%)' }}>{activeAgent.name} is processing...</span>
+        <div className="flex items-center gap-2 px-5 py-1.5 text-xs border-b border-white/8 bg-violet-600/10">
+          <Loader2 className="w-3 h-3 animate-spin text-violet-400" />
+          <span className="text-violet-300">{activeAgent.name} is processing...</span>
         </div>
       )}
 
@@ -237,17 +247,17 @@ function AppContent() {
       </main>
 
       {/* Agent Status Footer */}
-      <footer className="border-t px-4 py-2 bg-white/40 backdrop-blur-sm" style={{ borderColor: 'hsl(160 28% 88%)' }}>
+      <footer className="border-t border-white/8 px-5 py-2.5 bg-[#0A0A1B]/60 backdrop-blur-sm flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             {AGENTS.map(agent => (
-              <div key={agent.id} className="flex items-center gap-1.5 text-xs" style={{ color: 'hsl(160 25% 40%)' }}>
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: activeAgentId === agent.id ? 'hsl(45 95% 50%)' : 'hsl(160 85% 35%)' }} />
+              <div key={agent.id} className="flex items-center gap-1.5 text-xs text-slate-500">
+                <div className={`w-1.5 h-1.5 rounded-full transition-colors ${activeAgentId === agent.id ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
                 <span className="font-medium">{agent.name}</span>
               </div>
             ))}
           </div>
-          <span className="text-xs" style={{ color: 'hsl(160 25% 40%)' }}>3 AI Agents Active</span>
+          <span className="text-xs text-slate-600">3 AI Agents Active</span>
         </div>
       </footer>
     </div>
