@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, BarChart2, TrendingUp, Home, AlertCircle, LayoutGrid, Loader2, Trash2, Database } from 'lucide-react'
@@ -65,6 +65,8 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
   const [analysisError, setAnalysisError] = useState('')
   const [demandData, setDemandData] = useState<any>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [confirmDeleteName, setConfirmDeleteName] = useState('')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [seeding, setSeeding] = useState(false)
 
@@ -108,11 +110,12 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
     }
   }
 
-  const handleDeleteItem = async (id: string) => {
-    if (!id || deletingId) return
-    setDeletingId(id)
+  const handleDeleteItem = async () => {
+    if (!confirmDeleteId || deletingId) return
+    setDeletingId(confirmDeleteId)
+    setConfirmDeleteId(null)
     try {
-      await fetch(`/api/inventory?id=${id}`, { method: 'DELETE' })
+      await fetch(`/api/inventory?id=${confirmDeleteId}`, { method: 'DELETE' })
       await onInventoryChange()
     } catch {}
     setDeletingId(null)
@@ -336,7 +339,7 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteItem(item._id)}
+                              onClick={() => { setConfirmDeleteId(item._id); setConfirmDeleteName(item.project_name ?? 'this property') }}
                               disabled={deletingId === item._id}
                               className="h-7 w-7 p-0 text-slate-600 hover:text-red-400 hover:bg-red-500/10"
                             >
@@ -484,6 +487,25 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
           </CardContent>
         </Card>
       </div>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!confirmDeleteId} onOpenChange={open => { if (!open) setConfirmDeleteId(null) }}>
+        <DialogContent className="bg-[#0F0F28] border border-white/10 rounded-2xl max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-white">Delete Property</DialogTitle>
+            <DialogDescription className="text-slate-400 text-sm mt-1">
+              Are you sure you want to delete <span className="text-white font-medium">{confirmDeleteName}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 mt-2">
+            <Button variant="ghost" onClick={() => setConfirmDeleteId(null)} className="flex-1 rounded-xl border border-white/10 text-slate-300 hover:bg-white/5">
+              Cancel
+            </Button>
+            <Button onClick={handleDeleteItem} className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-900/30">
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ScrollArea>
   )
 }
