@@ -1,0 +1,24 @@
+{
+  "agent_name": "Lead Intelligence Agent",
+  "agent_id": "69ec6075603f5bad913c0e64",
+  "description": "Analyzes buyer profiles and generates lead scores, AI summaries, and personalized pitch messages for sales agents",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "lead_score": "string",
+    "score_reasoning": "string",
+    "ai_summary": "string",
+    "recommended_units": "string",
+    "pitch_message": "string",
+    "next_action": "string"
+  },
+  "example_response": {
+    "lead_score": "Hot, Warm, or Cold",
+    "score_reasoning": "sample string",
+    "ai_summary": "sample string",
+    "recommended_units": "JSON array of recommended units",
+    "pitch_message": "sample string",
+    "next_action": "sample string"
+  }
+}

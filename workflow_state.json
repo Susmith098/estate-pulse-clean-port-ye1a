@@ -1,0 +1,19 @@
+{
+  "agents": {
+    "buyer_recommendation_agent": {
+      "agent_id": "69ec6074f47b2b8f69099f76",
+      "name": "Buyer Recommendation Agent"
+    },
+    "lead_intelligence_agent": {
+      "agent_id": "69ec6075603f5bad913c0e64",
+      "name": "Lead Intelligence Agent"
+    },
+    "demand_insights_agent": {
+      "agent_id": "69ec6075744aec5380d4041f",
+      "name": "Demand Insights Agent"
+    }
+  },
+  "database": true,
+  "db_name": "app_5d8c76693447b2bdfc67a6a0",
+  "collections": ["inventory", "buyer_profiles", "leads"]
+}
