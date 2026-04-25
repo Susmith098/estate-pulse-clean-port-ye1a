@@ -98,27 +98,28 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
           agentData?.content ?? agentData?.answer ?? agentData?.summary ??
           result?.response?.message ?? ''
 
-        const hasRecs = agentData?.has_recommendations === true
         const prefComplete = agentData?.preference_complete === true
 
+        // Always attempt to extract recommendations from any JSON in the response
         let recommendations: any[] = []
-        if (hasRecs) {
-          const parsed = parseLLMJson(responseText)
-          if (Array.isArray(parsed)) {
-            recommendations = parsed
-          } else if (parsed && Array.isArray(parsed?.recommendations)) {
-            recommendations = parsed.recommendations
-          }
+        const textToCheck = responseText || JSON.stringify(agentData)
+        const parsed = parseLLMJson(textToCheck)
+        if (Array.isArray(parsed)) {
+          recommendations = parsed
+        } else if (parsed && Array.isArray(parsed?.recommendations)) {
+          recommendations = parsed.recommendations
+        }
+        // Also check if agentData directly has recommendations array
+        if (recommendations.length === 0 && Array.isArray(agentData?.recommendations)) {
+          recommendations = agentData.recommendations
         }
 
-        // If still empty, try to JSON-stringify the whole result for debugging
-        const displayText = responseText.trim()
-          ? (hasRecs && recommendations.length > 0 && (responseText.trim().startsWith('[') || responseText.trim().startsWith('{'))
-            ? 'Here are my recommendations based on your preferences:'
-            : responseText)
-          : (Object.keys(agentData).length > 0
-            ? JSON.stringify(agentData, null, 2)
-            : 'I received your message but got an empty response. Please try again.')
+        const isJsonBlob = responseText.trim().startsWith('{') || responseText.trim().startsWith('[')
+        const displayText = recommendations.length > 0 && isJsonBlob
+          ? 'Here are my recommendations based on your preferences:'
+          : (responseText.trim() || (Object.keys(agentData).length > 0
+            ? 'I found some options for you!'
+            : 'I received your message but got an empty response. Please try again.'))
 
         setMessages(prev => [...prev, { role: 'assistant', content: displayText, recommendations }])
 
