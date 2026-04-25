@@ -146,12 +146,23 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
 
         setMessages(prev => [...prev, { role: 'assistant', content: displayText, recommendations }])
 
-        if (prefComplete) {
+        // Save buyer profile whenever we have recommendations or preference_complete flag
+        if (prefComplete || recommendations.length > 0) {
           try {
+            const firstRec = recommendations[0] ?? {}
+            const profileData: any = {
+              buyer_name: userId !== 'demo-user' ? userId : 'Buyer',
+              purpose: agentData?.purpose ?? 'purchase',
+            }
+            if (firstRec.bhk) profileData.bhk = firstRec.bhk
+            if (firstRec.location) profileData.location_pref = firstRec.location
+            if (firstRec.price) { profileData.budget_min = 0; profileData.budget_max = firstRec.price }
+            if (agentData?.budget_max) profileData.budget_max = agentData.budget_max
+            if (agentData?.location_pref) profileData.location_pref = agentData.location_pref
             await fetch('/api/buyer-profiles', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ buyer_name: 'Buyer', purpose: 'purchase' }),
+              body: JSON.stringify(profileData),
             })
             onProfileSaved()
           } catch {}
