@@ -91,8 +91,13 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
       )
 
       if (result.success) {
-        const agentData = result?.response?.result
-        const responseText = agentData?.response ?? ''
+        const agentData = result?.response?.result ?? result?.response ?? {}
+        // Try multiple field names the agent may use
+        const responseText: string =
+          agentData?.response ?? agentData?.message ?? agentData?.text ??
+          agentData?.content ?? agentData?.answer ?? agentData?.summary ??
+          result?.response?.message ?? ''
+
         const hasRecs = agentData?.has_recommendations === true
         const prefComplete = agentData?.preference_complete === true
 
@@ -106,9 +111,14 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
           }
         }
 
-        const displayText = hasRecs && recommendations.length > 0
-          ? (typeof responseText === 'string' && !responseText.trim().startsWith('[') && !responseText.trim().startsWith('{') ? responseText : 'Here are my recommendations based on your preferences:')
-          : (typeof responseText === 'string' ? responseText : JSON.stringify(responseText, null, 2))
+        // If still empty, try to JSON-stringify the whole result for debugging
+        const displayText = responseText.trim()
+          ? (hasRecs && recommendations.length > 0 && (responseText.trim().startsWith('[') || responseText.trim().startsWith('{'))
+            ? 'Here are my recommendations based on your preferences:'
+            : responseText)
+          : (Object.keys(agentData).length > 0
+            ? JSON.stringify(agentData, null, 2)
+            : 'I received your message but got an empty response. Please try again.')
 
         setMessages(prev => [...prev, { role: 'assistant', content: displayText, recommendations }])
 
@@ -123,10 +133,11 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
           } catch {}
         }
       } else {
-        setError(result?.error ?? 'Failed to get response')
+        const errMsg = result?.response?.message ?? result?.error ?? 'Agent returned an error. Please try again.'
+        setError(errMsg)
       }
     } catch (err: any) {
-      setError(err?.message ?? 'Network error')
+      setError(err?.message ?? 'Network error — check your connection')
     } finally {
       setLoading(false)
       setActiveAgentId(null)
