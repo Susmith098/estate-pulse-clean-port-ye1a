@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Send, MessageSquare, MapPin, Star, Loader2 } from 'lucide-react'
+import { Send, MessageSquare, MapPin, Star, Loader2, Trash2 } from 'lucide-react'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -57,12 +57,23 @@ const SUGGESTIONS = [
   'I need a family home near schools',
 ]
 
+const CHAT_STORAGE_KEY = 'estatepulse_chat_history'
+
 export default function BuyerView({ userId, sessionId, inventory, onProfileSaved, setActiveAgentId }: BuyerViewProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem(CHAT_STORAGE_KEY)
+      return saved ? JSON.parse(saved) : []
+    } catch { return [] }
+  })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages)) } catch {}
+  }, [messages])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -103,16 +114,28 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
         // Always attempt to extract recommendations from any JSON in the response
         let recommendations: any[] = []
         const textToCheck = responseText || JSON.stringify(agentData)
-        const parsed = parseLLMJson(textToCheck)
+
+        const tryParse = (text: string) => {
+          try { return JSON.parse(text) } catch {}
+          return parseLLMJson(text)
+        }
+
+        const parsed = tryParse(textToCheck)
         if (Array.isArray(parsed)) {
           recommendations = parsed
         } else if (parsed && Array.isArray(parsed?.recommendations)) {
           recommendations = parsed.recommendations
         }
-        // Also check if agentData directly has recommendations array
         if (recommendations.length === 0 && Array.isArray(agentData?.recommendations)) {
           recommendations = agentData.recommendations
         }
+
+        // Normalize field names (why_this_fits → reason, etc.)
+        recommendations = recommendations.map((r: any) => ({
+          ...r,
+          reason: r.reason ?? r.why_this_fits ?? r.why ?? '',
+          match_score: r.match_score ?? r.score ?? r.match ?? undefined,
+        }))
 
         const isJsonBlob = responseText.trim().startsWith('{') || responseText.trim().startsWith('[')
         const displayText = recommendations.length > 0 && isJsonBlob
@@ -235,7 +258,18 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
       )}
 
       <div className="p-4 border-t border-white/8 bg-[#0A0A1B]/40">
-        <div className="flex gap-2 max-w-3xl mx-auto">
+        <div className="flex gap-2 max-w-3xl mx-auto items-center">
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setMessages([]); try { localStorage.removeItem(CHAT_STORAGE_KEY) } catch {} }}
+              className="rounded-xl h-10 px-3 text-slate-500 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0"
+              title="Clear chat history"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
