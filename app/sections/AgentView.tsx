@@ -191,11 +191,15 @@ export default function AgentView({ userId, inventory, buyerProfiles, leads, onL
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">
             {allProfiles.length === 0 && (
-              <div className="text-center py-10 px-4">
+              <div className="text-center py-8 px-4">
                 <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-3">
                   <Users className="w-6 h-6 text-slate-500" />
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">No buyer profiles yet. They appear after buyers complete their preferences in chat.</p>
+                <p className="text-xs text-slate-500 leading-relaxed mb-3">No buyer profiles yet. They appear after buyers complete their preferences in chat.</p>
+                <div className="p-2.5 rounded-xl bg-violet-600/10 border border-violet-500/20 text-left">
+                  <p className="text-xs text-violet-300 font-medium mb-1">Quick tip</p>
+                  <p className="text-xs text-slate-400 leading-relaxed">Enable <span className="text-violet-300 font-medium">Sample Data</span> toggle in the header to preview with demo profiles.</p>
+                </div>
               </div>
             )}
             {allProfiles.map((profile: any) => {
