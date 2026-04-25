@@ -1,0 +1,20 @@
+{
+  "agent_name": "Demand Insights Agent",
+  "agent_id": "69ec6075744aec5380d4041f",
+  "description": "Analyzes aggregate buyer demand data against inventory to surface trends and inventory intelligence for builders",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "demand_trends": "string",
+    "inventory_match": "string",
+    "insights_summary": "string",
+    "action_items": "string"
+  },
+  "example_response": {
+    "demand_trends": "JSON object with demand trend data",
+    "inventory_match": "JSON array of inventory-demand matches",
+    "insights_summary": "sample string",
+    "action_items": "JSON array of action items"
+  }
+}

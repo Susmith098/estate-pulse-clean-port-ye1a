@@ -1,0 +1,18 @@
+{
+  "agent_name": "Buyer Recommendation Agent",
+  "agent_id": "69ec6074f47b2b8f69099f76",
+  "description": "Conversational agent that collects buyer preferences and recommends matching properties from inventory",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "response": "string",
+    "has_recommendations": "boolean",
+    "preference_complete": "boolean"
+  },
+  "example_response": {
+    "response": "Conversational text response or JSON recommendations",
+    "has_recommendations": false,
+    "preference_complete": false
+  }
+}
