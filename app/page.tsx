@@ -112,13 +112,11 @@ function AppContent() {
   const seedInventory = useCallback(async () => {
     setSeeding(true)
     try {
-      for (const item of SEED_INVENTORY) {
-        await fetch('/api/inventory', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(item),
-        })
-      }
+      await fetch('/api/inventory/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: SEED_INVENTORY }),
+      })
       await fetchInventory()
     } catch {}
     setSeeding(false)
@@ -159,7 +157,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-[#0D0D24]">
+    <div className="h-screen flex flex-col font-sans bg-[#0D0D24] overflow-hidden">
       {/* Top Bar */}
       <header className="h-14 flex items-center justify-between px-5 border-b border-white/8 bg-[#0A0A1B]/80 backdrop-blur-md flex-shrink-0">
         <div className="flex items-center gap-2.5">
@@ -241,6 +239,7 @@ function AppContent() {
               { _id: 's2', buyer_name: 'Buyer B', bhk: 3, location_pref: 'Pune', budget_min: 10000000, budget_max: 15000000, purpose: 'Investment' },
             ] : buyerProfiles}
             onInventoryChange={fetchInventory}
+            onSeedInventory={seedInventory}
             setActiveAgentId={setActiveAgentId}
           />
         )}
