@@ -11,7 +11,8 @@ export default async function getBuyerProfileModel() {
       bhk: { type: Number },
       amenities: [{ type: String }],
       purpose: { type: String },
-      timeline: { type: String }
+      timeline: { type: String },
+      initial_query: { type: String }
     });
   }
   return _model;

@@ -91,8 +91,25 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
     setActiveAgentId(BUYER_AGENT_ID)
 
     try {
-      // Only share inventory after ≥2 user messages so agent collects preferences first
       const userMessageCount = messages.filter(m => m.role === 'user').length
+
+      // Register buyer profile on very first message
+      if (userMessageCount === 0) {
+        try {
+          await fetch('/api/buyer-profiles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              buyer_name: userId !== 'demo-user' ? userId : 'Buyer',
+              purpose: 'purchase',
+              initial_query: userMsg,
+            }),
+          })
+          onProfileSaved()
+        } catch {}
+      }
+
+      // Only share inventory after ≥2 user messages so agent collects preferences first
       const inventorySummary = userMessageCount >= 2 && Array.isArray(inventory) && inventory.length > 0
         ? `\n\nAvailable inventory:\n${inventory.map((u: any) => `${u?.project_name} - ${u?.bhk}BHK, ${u?.area_sqft}sqft, Rs.${u?.price}, ${u?.location}, Floor ${u?.floor}, Amenities: ${Array.isArray(u?.amenities) ? u.amenities.join(', ') : 'N/A'}, Status: ${u?.status}`).join('\n')}`
         : ''
