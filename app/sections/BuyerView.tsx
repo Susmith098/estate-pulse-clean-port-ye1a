@@ -26,18 +26,20 @@ interface BuyerViewProps {
 
 const BUYER_AGENT_ID = '69ec6074f47b2b8f69099f76'
 
-function renderMarkdown(text: string) {
+function renderMarkdown(text: string, isUser = false) {
   if (!text) return null
+  const baseText = isUser ? 'text-white' : 'text-slate-200'
+  const mutedText = isUser ? 'text-white/80' : 'text-slate-400'
   return (
     <div className="space-y-1">
       {text.split('\n').map((line, i) => {
-        if (line.startsWith('### ')) return <h4 key={i} className="font-semibold text-sm mt-2 mb-1">{line.slice(4)}</h4>
-        if (line.startsWith('## ')) return <h3 key={i} className="font-semibold text-base mt-2 mb-1">{line.slice(3)}</h3>
-        if (line.startsWith('# ')) return <h2 key={i} className="font-bold text-lg mt-3 mb-1">{line.slice(2)}</h2>
-        if (line.startsWith('- ') || line.startsWith('* ')) return <li key={i} className="ml-4 list-disc text-sm">{formatInline(line.slice(2))}</li>
-        if (/^\d+\.\s/.test(line)) return <li key={i} className="ml-4 list-decimal text-sm">{formatInline(line.replace(/^\d+\.\s/, ''))}</li>
+        if (line.startsWith('### ')) return <h4 key={i} className={`font-semibold text-sm mt-2 mb-1 ${baseText}`}>{line.slice(4)}</h4>
+        if (line.startsWith('## ')) return <h3 key={i} className={`font-semibold text-base mt-2 mb-1 ${baseText}`}>{line.slice(3)}</h3>
+        if (line.startsWith('# ')) return <h2 key={i} className={`font-bold text-lg mt-3 mb-1 ${baseText}`}>{line.slice(2)}</h2>
+        if (line.startsWith('- ') || line.startsWith('* ')) return <li key={i} className={`ml-4 list-disc text-sm ${baseText}`}>{formatInline(line.slice(2))}</li>
+        if (/^\d+\.\s/.test(line)) return <li key={i} className={`ml-4 list-decimal text-sm ${baseText}`}>{formatInline(line.replace(/^\d+\.\s/, ''))}</li>
         if (!line.trim()) return <div key={i} className="h-1" />
-        return <p key={i} className="text-sm">{formatInline(line)}</p>
+        return <p key={i} className={`text-sm ${baseText}`}>{formatInline(line)}</p>
       })}
     </div>
   )
@@ -164,10 +166,10 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
                 <div className={`max-w-[82%]`}>
                   <div className={`rounded-2xl px-4 py-3 ${
                     msg.role === 'user'
-                      ? 'bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-900/30'
-                      : 'bg-white/8 border border-white/10 text-slate-200'
+                      ? 'bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-900/30'
+                      : 'bg-white/8 border border-white/10'
                   }`}>
-                    {renderMarkdown(msg.content)}
+                    {renderMarkdown(msg.content, msg.role === 'user')}
                   </div>
                   {Array.isArray(msg.recommendations) && msg.recommendations.length > 0 && (
                     <div className="mt-3 space-y-3">

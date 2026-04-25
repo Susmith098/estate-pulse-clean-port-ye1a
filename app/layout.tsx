@@ -8,8 +8,8 @@ import ClientProviders from '@/components/ClientProviders'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Next.js App',
-  description: 'Built with Next.js, React, and Tailwind CSS',
+  title: 'EstatePulse — AI Pre-Sales Platform',
+  description: 'AI-powered real estate pre-sales platform with buyer recommendations, lead intelligence, and demand analytics.',
   icons: {
     icon: '/lyzr.png',
   },
@@ -22,7 +22,7 @@ export default function RootLayout({
 }) {
   const isPaidUser = process.env.IS_PAID_USER === 'true'
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <IframeLoggerInit />
         <ClientProviders>

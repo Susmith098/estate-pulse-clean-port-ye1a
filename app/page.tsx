@@ -159,7 +159,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-[#0D0D24]">
+    <div className="h-screen flex flex-col font-sans bg-[#0D0D24] overflow-hidden">
       {/* Top Bar */}
       <header className="h-14 flex items-center justify-between px-5 border-b border-white/8 bg-[#0A0A1B]/80 backdrop-blur-md flex-shrink-0">
         <div className="flex items-center gap-2.5">
