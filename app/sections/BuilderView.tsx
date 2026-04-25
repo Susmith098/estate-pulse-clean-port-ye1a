@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, BarChart2, TrendingUp, Home, AlertCircle, LayoutGrid, Loader2 } from 'lucide-react'
+import { Plus, BarChart2, TrendingUp, Home, AlertCircle, LayoutGrid, Loader2, Trash2 } from 'lucide-react'
 
 interface BuilderViewProps {
   userId: string
@@ -41,9 +41,16 @@ function renderMarkdown(text: string) {
   )
 }
 
-const statusStyle = (status: string) => {
+function statusBadgeClass(status: string) {
   if (status === 'available') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
   if (status === 'reserved') return 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+  return 'bg-red-500/15 text-red-400 border-red-500/30'
+}
+
+function demandBadgeClass(level: string) {
+  const l = (level ?? '').toLowerCase()
+  if (l === 'high') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+  if (l === 'medium') return 'bg-amber-500/15 text-amber-400 border-amber-500/30'
   return 'bg-red-500/15 text-red-400 border-red-500/30'
 }
 
@@ -56,6 +63,8 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisError, setAnalysisError] = useState('')
   const [demandData, setDemandData] = useState<any>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   const items = Array.isArray(inventory) ? inventory : []
   const profiles = Array.isArray(buyerProfiles) ? buyerProfiles : []
@@ -97,6 +106,30 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
     }
   }
 
+  const handleDeleteItem = async (id: string) => {
+    if (!id || deletingId) return
+    setDeletingId(id)
+    try {
+      await fetch(`/api/inventory?id=${id}`, { method: 'DELETE' })
+      await onInventoryChange()
+    } catch {}
+    setDeletingId(null)
+  }
+
+  const handleStatusChange = async (id: string, status: string) => {
+    if (!id || updatingId) return
+    setUpdatingId(id)
+    try {
+      await fetch('/api/inventory', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      })
+      await onInventoryChange()
+    } catch {}
+    setUpdatingId(null)
+  }
+
   const handleAnalyzeDemand = async () => {
     setAnalyzing(true)
     setAnalysisError('')
@@ -133,29 +166,26 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
     }
   }
 
-  const getDemandStyle = (level: string) => {
-    const l = (level ?? '').toLowerCase()
-    if (l === 'high') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-    if (l === 'medium') return 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-    return 'bg-red-500/15 text-red-400 border-red-500/30'
-  }
+  const available = items.filter(i => i?.status === 'available').length
+  const reserved = items.filter(i => i?.status === 'reserved').length
+  const sold = items.filter(i => i?.status === 'sold').length
 
   return (
     <ScrollArea className="h-full bg-[#0D0D24]">
       <div className="p-5 space-y-5 max-w-6xl mx-auto">
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Total Units', value: items.length, sub: 'in inventory' },
-            { label: 'Available', value: items.filter(i => i?.status === 'available').length, sub: 'ready to sell' },
-            { label: 'Buyer Profiles', value: profiles.length, sub: 'registered' },
+            { label: 'Total Units', value: items.length, color: 'text-white' },
+            { label: 'Available', value: available, color: 'text-emerald-400' },
+            { label: 'Reserved', value: reserved, color: 'text-amber-400' },
+            { label: 'Sold', value: sold, color: 'text-red-400' },
           ].map(stat => (
             <Card key={stat.label} className="bg-white/5 border border-white/8 rounded-2xl">
               <CardContent className="p-4">
                 <p className="text-xs text-slate-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
-                <p className="text-xs text-slate-600 mt-0.5">{stat.sub}</p>
+                <p className={`text-2xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
               </CardContent>
             </Card>
           ))}
@@ -253,14 +283,9 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/8 hover:bg-transparent">
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">Project</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">Unit</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">BHK</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">Area</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">Price</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">Location</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">Floor</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-400 bg-white/5">Status</TableHead>
+                      {['Project', 'Unit', 'BHK', 'Area', 'Price', 'Location', 'Floor', 'Status', ''].map(h => (
+                        <TableHead key={h} className="text-xs font-semibold text-slate-400 bg-white/5">{h}</TableHead>
+                      ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -274,7 +299,39 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                         <TableCell className="text-xs text-slate-400">{item?.location ?? '-'}</TableCell>
                         <TableCell className="text-xs text-slate-400">{item?.floor ?? '-'}</TableCell>
                         <TableCell>
-                          <Badge className={`text-xs capitalize border ${statusStyle(item?.status)}`}>{item?.status ?? 'available'}</Badge>
+                          {item?._id ? (
+                            <Select
+                              value={item?.status ?? 'available'}
+                              onValueChange={v => handleStatusChange(item._id, v)}
+                              disabled={updatingId === item._id}
+                            >
+                              <SelectTrigger className={`h-7 text-xs rounded-lg border px-2 w-28 bg-transparent ${statusBadgeClass(item?.status)}`}>
+                                {updatingId === item._id ? <Loader2 className="w-3 h-3 animate-spin" /> : <SelectValue />}
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#0F0F28] border-white/10">
+                                <SelectItem value="available">Available</SelectItem>
+                                <SelectItem value="reserved">Reserved</SelectItem>
+                                <SelectItem value="sold">Sold</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge className={`text-xs capitalize border ${statusBadgeClass(item?.status)}`}>{item?.status ?? 'available'}</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {item?._id && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteItem(item._id)}
+                              disabled={deletingId === item._id}
+                              className="h-7 w-7 p-0 text-slate-600 hover:text-red-400 hover:bg-red-500/10"
+                            >
+                              {deletingId === item._id
+                                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                : <Trash2 className="w-3.5 h-3.5" />}
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -317,14 +374,18 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                 <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-3">
                   <BarChart2 className="w-6 h-6 text-slate-500" />
                 </div>
-                <p className="text-sm text-slate-500 max-w-sm mx-auto">Click "Analyze Demand" to generate AI-powered insights from buyer preferences and your inventory data.</p>
+                <p className="text-sm text-slate-500 max-w-sm mx-auto">
+                  Click "Analyze Demand" to generate AI-powered insights from buyer preferences and your inventory.
+                </p>
               </div>
             )}
 
             {analyzing && (
               <div className="text-center py-10">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 text-violet-400" />
-                <p className="text-sm text-slate-400">Crunching data across {profiles.length} buyer profiles and {items.length} inventory units...</p>
+                <p className="text-sm text-slate-400">
+                  Crunching data across {profiles.length} buyer profiles and {items.length} inventory units...
+                </p>
               </div>
             )}
 
@@ -361,10 +422,9 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                       <Table>
                         <TableHeader>
                           <TableRow className="border-white/8 hover:bg-transparent">
-                            <TableHead className="text-xs text-slate-400 bg-white/5">Property</TableHead>
-                            <TableHead className="text-xs text-slate-400 bg-white/5">Details</TableHead>
-                            <TableHead className="text-xs text-slate-400 bg-white/5">Demand</TableHead>
-                            <TableHead className="text-xs text-slate-400 bg-white/5">Notes</TableHead>
+                            {['Property', 'Details', 'Demand', 'Notes'].map(h => (
+                              <TableHead key={h} className="text-xs text-slate-400 bg-white/5">{h}</TableHead>
+                            ))}
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -373,7 +433,9 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                               <TableCell className="text-xs font-medium text-slate-200">{m?.project_name ?? m?.property ?? m?.name ?? '-'}</TableCell>
                               <TableCell className="text-xs text-slate-400">{m?.unit_number ?? ''}{m?.bhk ? ` ${m.bhk}BHK` : ''}{m?.location ? ` · ${m.location}` : ''}</TableCell>
                               <TableCell>
-                                <Badge className={`text-xs border ${getDemandStyle(m?.demand_level ?? m?.demand ?? '')}`}>{m?.demand_level ?? m?.demand ?? 'N/A'}</Badge>
+                                <Badge className={`text-xs border ${demandBadgeClass(m?.demand_level ?? m?.demand ?? '')}`}>
+                                  {m?.demand_level ?? m?.demand ?? 'N/A'}
+                                </Badge>
                               </TableCell>
                               <TableCell className="text-xs text-slate-400 max-w-[200px] truncate">{m?.notes ?? m?.reason ?? m?.recommendation ?? '-'}</TableCell>
                             </TableRow>
@@ -394,7 +456,9 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                             {i + 1}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-slate-200">{typeof item === 'string' ? item : (item?.title ?? item?.action ?? item?.description ?? JSON.stringify(item))}</p>
+                            <p className="text-sm font-medium text-slate-200">
+                              {typeof item === 'string' ? item : (item?.title ?? item?.action ?? item?.description ?? JSON.stringify(item))}
+                            </p>
                             {typeof item === 'object' && item?.details && <p className="text-xs mt-1 text-slate-500">{item.details}</p>}
                           </div>
                         </div>
@@ -409,11 +473,4 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
       </div>
     </ScrollArea>
   )
-
-  function getDemandStyle(level: string) {
-    const l = (level ?? '').toLowerCase()
-    if (l === 'high') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-    if (l === 'medium') return 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-    return 'bg-red-500/15 text-red-400 border-red-500/30'
-  }
 }
