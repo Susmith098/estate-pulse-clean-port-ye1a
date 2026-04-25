@@ -58,6 +58,7 @@ const SUGGESTIONS = [
 ]
 
 const CHAT_STORAGE_KEY = 'estatepulse_chat_history'
+const PROFILE_ID_KEY = 'estatepulse_current_profile_id'
 
 export default function BuyerView({ userId, sessionId, inventory, onProfileSaved, setActiveAgentId }: BuyerViewProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -65,6 +66,9 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
       const saved = localStorage.getItem(CHAT_STORAGE_KEY)
       return saved ? JSON.parse(saved) : []
     } catch { return [] }
+  })
+  const [currentProfileId, setCurrentProfileId] = useState<string | null>(() => {
+    try { return localStorage.getItem(PROFILE_ID_KEY) } catch { return null }
   })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -93,10 +97,11 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
     try {
       const userMessageCount = messages.filter(m => m.role === 'user').length
 
-      // Register buyer profile on very first message
+      // Register buyer profile on very first message of each chat session
+      let profileId = currentProfileId
       if (userMessageCount === 0) {
         try {
-          await fetch('/api/buyer-profiles', {
+          const res = await fetch('/api/buyer-profiles', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -105,6 +110,12 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
               initial_query: userMsg,
             }),
           })
+          const data = await res.json()
+          if (data.success && data.data?._id) {
+            profileId = data.data._id
+            setCurrentProfileId(profileId)
+            try { localStorage.setItem(PROFILE_ID_KEY, profileId!) } catch {}
+          }
           onProfileSaved()
         } catch {}
       }
@@ -165,25 +176,27 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
 
         setMessages(prev => [...prev, { role: 'assistant', content: displayText, recommendations }])
 
-        // Save buyer profile whenever we have recommendations or preference_complete flag
-        if (prefComplete || recommendations.length > 0) {
+        // Update buyer profile with extracted preferences whenever available
+        if (profileId && (prefComplete || recommendations.length > 0 || agentData?.bhk || agentData?.location_pref || agentData?.budget_max)) {
           try {
             const firstRec = recommendations[0] ?? {}
-            const profileData: any = {
-              buyer_name: userId !== 'demo-user' ? userId : 'Buyer',
-              purpose: agentData?.purpose ?? 'purchase',
+            const updates: any = { id: profileId }
+            if (agentData?.purpose) updates.purpose = agentData.purpose
+            if (agentData?.bhk ?? firstRec.bhk) updates.bhk = agentData?.bhk ?? firstRec.bhk
+            if (agentData?.location_pref ?? firstRec.location) updates.location_pref = agentData?.location_pref ?? firstRec.location
+            if (agentData?.budget_max) updates.budget_max = agentData.budget_max
+            if (agentData?.budget_min) updates.budget_min = agentData.budget_min
+            if (agentData?.timeline) updates.timeline = agentData.timeline
+            if (Array.isArray(agentData?.amenities) && agentData.amenities.length > 0) updates.amenities = agentData.amenities
+            if (firstRec.price && !updates.budget_max) { updates.budget_min = 0; updates.budget_max = firstRec.price }
+            if (Object.keys(updates).length > 1) {
+              await fetch('/api/buyer-profiles', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates),
+              })
+              onProfileSaved()
             }
-            if (firstRec.bhk) profileData.bhk = firstRec.bhk
-            if (firstRec.location) profileData.location_pref = firstRec.location
-            if (firstRec.price) { profileData.budget_min = 0; profileData.budget_max = firstRec.price }
-            if (agentData?.budget_max) profileData.budget_max = agentData.budget_max
-            if (agentData?.location_pref) profileData.location_pref = agentData.location_pref
-            await fetch('/api/buyer-profiles', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(profileData),
-            })
-            onProfileSaved()
           } catch {}
         }
       } else {
@@ -200,8 +213,12 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
 
   const handleNewChat = () => {
     setMessages([])
+    setCurrentProfileId(null)
     setError('')
-    try { localStorage.removeItem(CHAT_STORAGE_KEY) } catch {}
+    try {
+      localStorage.removeItem(CHAT_STORAGE_KEY)
+      localStorage.removeItem(PROFILE_ID_KEY)
+    } catch {}
   }
 
   return (
@@ -310,7 +327,7 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => { setMessages([]); try { localStorage.removeItem(CHAT_STORAGE_KEY) } catch {} }}
+              onClick={handleNewChat}
               className="rounded-xl h-10 px-3 text-slate-500 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0"
               title="Clear chat history"
             >
