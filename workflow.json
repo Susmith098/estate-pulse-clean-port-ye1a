@@ -1,0 +1,13 @@
+{
+  "nodes": [
+    { "id": "input_node", "type": "Input", "label": "User Input", "nodeCategory": "input" },
+    { "id": "buyer_agent", "type": "Agent", "label": "Buyer Recommendation Agent", "nodeCategory": "agent" },
+    { "id": "lead_agent", "type": "Agent", "label": "Lead Intelligence Agent", "nodeCategory": "agent" },
+    { "id": "demand_agent", "type": "Agent", "label": "Demand Insights Agent", "nodeCategory": "agent" }
+  ],
+  "edges": [
+    { "source": "input_node", "target": "buyer_agent" },
+    { "source": "input_node", "target": "lead_agent" },
+    { "source": "input_node", "target": "demand_agent" }
+  ]
+}
