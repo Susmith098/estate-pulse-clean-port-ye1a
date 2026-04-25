@@ -227,7 +227,7 @@ export default function BuyerView({ userId, sessionId, inventory, onProfileSaved
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder="Describe your ideal property..."
-            className="flex-1 rounded-xl border-white/10 bg-white/6 text-white placeholder:text-slate-500 focus:border-violet-500/50 focus:ring-violet-500/20"
+            className="flex-1 rounded-xl border-white/10 bg-[#1a1a35] text-slate-100 placeholder:text-slate-500 focus:border-violet-500/50 focus:ring-violet-500/20"
             disabled={loading}
           />
           <Button
