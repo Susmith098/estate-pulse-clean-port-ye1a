@@ -69,8 +69,13 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
   const [confirmDeleteName, setConfirmDeleteName] = useState('')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [seeding, setSeeding] = useState(false)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 10
 
   const items = Array.isArray(inventory) ? inventory : []
+  // Reset to page 1 if current page exceeds total pages
+  const totalPages = Math.ceil(items.length / PAGE_SIZE)
+  if (page > totalPages && totalPages > 0 && page !== 1) setPage(1)
   const profiles = Array.isArray(buyerProfiles) ? buyerProfiles : []
 
   const handleAddProperty = async () => {
@@ -294,7 +299,11 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                   </Button>
                 )}
               </div>
-            ) : (
+            ) : (() => {
+              const totalPages = Math.ceil(items.length / PAGE_SIZE)
+              const pageItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+              return (
+              <div>
               <div className="overflow-x-auto rounded-xl border border-white/8">
                 <Table>
                   <TableHeader>
@@ -305,7 +314,7 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.map((item: any, i: number) => (
+                    {pageItems.map((item: any, i: number) => (
                       <TableRow key={item?._id ?? i} className="border-white/8 hover:bg-white/3">
                         <TableCell className="text-xs font-medium text-slate-200">{item?.project_name ?? '-'}</TableCell>
                         <TableCell className="text-xs text-slate-400">{item?.tower ? `${item.tower}-` : ''}{item?.unit_number ?? '-'}</TableCell>
@@ -354,7 +363,22 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                   </TableBody>
                 </Table>
               </div>
-            )}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-1 pt-3">
+                  <span className="text-xs text-slate-500">
+                    Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, items.length)} of {items.length} units
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="h-7 px-2.5 text-xs text-slate-400 hover:text-white hover:bg-white/8 disabled:opacity-30 rounded-lg">← Prev</Button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                      <button key={p} onClick={() => setPage(p)} className={`h-7 w-7 rounded-lg text-xs font-medium transition-all ${p === page ? 'bg-violet-600 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-white'}`}>{p}</button>
+                    ))}
+                    <Button variant="ghost" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="h-7 px-2.5 text-xs text-slate-400 hover:text-white hover:bg-white/8 disabled:opacity-30 rounded-lg">Next →</Button>
+                  </div>
+                </div>
+              )}
+              </div>
+              )})()}
           </CardContent>
         </Card>
 
