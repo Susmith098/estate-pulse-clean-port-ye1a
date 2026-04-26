@@ -370,9 +370,22 @@ export default function BuilderView({ userId, inventory, buyerProfiles, onInvent
                   </span>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="h-7 px-2.5 text-xs text-slate-400 hover:text-white hover:bg-white/8 disabled:opacity-30 rounded-lg">← Prev</Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                      <button key={p} onClick={() => setPage(p)} className={`h-7 w-7 rounded-lg text-xs font-medium transition-all ${p === page ? 'bg-violet-600 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-white'}`}>{p}</button>
-                    ))}
+                    {(() => {
+                      const pages: (number | '...')[] = []
+                      if (totalPages <= 7) {
+                        for (let i = 1; i <= totalPages; i++) pages.push(i)
+                      } else {
+                        pages.push(1)
+                        if (page > 3) pages.push('...')
+                        for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i)
+                        if (page < totalPages - 2) pages.push('...')
+                        pages.push(totalPages)
+                      }
+                      return pages.map((p, i) => p === '...'
+                        ? <span key={`e${i}`} className="h-7 w-6 flex items-center justify-center text-xs text-slate-600">…</span>
+                        : <button key={p} onClick={() => setPage(p as number)} className={`h-7 w-7 rounded-lg text-xs font-medium transition-all ${p === page ? 'bg-violet-600 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-white'}`}>{p}</button>
+                      )
+                    })()}
                     <Button variant="ghost" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="h-7 px-2.5 text-xs text-slate-400 hover:text-white hover:bg-white/8 disabled:opacity-30 rounded-lg">Next →</Button>
                   </div>
                 </div>
